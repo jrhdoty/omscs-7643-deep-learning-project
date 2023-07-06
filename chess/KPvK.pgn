@@ -1,0 +1,12 @@
+[Event ""]
+[Site "https://syzygy-tables.info/?fen=8/8/7k/8/7K/1P6/8/8_b_-_-_0_1"]
+[Date "2023.07.06"]
+[Round "-"]
+[White "Syzygy"]
+[Black "Syzygy"]
+[Result "1-0"]
+[Annotator "syzygy-tables.info"]
+[FEN "8/8/7k/8/7K/1P6/8/8 b - - 0 1"]
+[SetUp "1"]
+
+{ DTZ -20 } 1... Kg6 2. Kg4 Kf6 3. Kf4 Ke6 4. Ke4 Kd6 5. Kd4 Kc6 6. Kc4 Kb6 7. Kb4 Ka6 8. Kc5 Kb7 9. Kb5 Ka7 10. Kc6 Ka6 11. b4 { KPvK with DTZ -2 } 11... Ka7 12. b5 { KPvK with DTZ -6 } 12... Kb8 13. Kb6 Ka8 14. Kc7 Ka7 15. b6+ { KPvK with DTZ -2 } 15... Ka6 16. b7 { KPvK with DTZ -2 } 16... Ka5 17. b8=Q { KQvK with DTZ -6 } 17... Ka4 18. Qb2 Ka5 19. Qb3 Ka6 20. Qa4# { Checkmate } 1-0

@@ -1,0 +1,13 @@
+[Event ""]
+[Site "https://syzygy-tables.info/?fen=7n/8/8/8/8/8/2NK4/1kN5_w_-_-_0_1"]
+[Date "2023.07.06"]
+[Round "-"]
+[White "Syzygy"]
+[Black "Syzygy"]
+[Result "1-0"]
+[Annotator "syzygy-tables.info"]
+[FEN "7n/8/8/8/8/8/2NK4/1kN5 w - - 0 1"]
+[SetUp "1"]
+
+{ DTZ 13 } 1. Na3+ Kb2 2. Nc4+ Kb1 3. Ne2 Ng6 4. Nc3+ Ka1 5. Kc2 Nf4 6. Nd2 Ne2 7. Nb3# { Checkmate } 1-0
+
