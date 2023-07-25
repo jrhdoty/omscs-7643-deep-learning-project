@@ -9,7 +9,6 @@ from connect_board import board as c_board
 import copy
 import torch
 import torch.multiprocessing as mp
-from alpha_net_c4 import ConnectNet
 import datetime
 import logging
 from tqdm import tqdm
@@ -207,9 +206,9 @@ def MCTS_self_play(connectnet, num_games, start_idx, cpu, args, iteration):
         save_as_pickle("iter_%d/" % iteration +\
                        "dataset_iter%d_cpu%i_%i_%s" % (iteration, cpu, idxx, datetime.datetime.today().strftime("%Y-%m-%d")), dataset_p)
    
-def run_MCTS(args, start_idx=0, iteration=0):
+def run_MCTS(model, args, start_idx=0, iteration=0):
     net_to_play="%s_iter%d.pth.tar" % (args.neural_net_name, iteration)
-    net = ConnectNet()
+    net = model()
     cuda = torch.cuda.is_available()
     if cuda:
         net.cuda()

@@ -3,7 +3,6 @@
 import os.path
 import torch
 import numpy as np
-from alpha_net_c4 import ConnectNet
 from connect_board import board as cboard
 import encoder_decoder_c4 as ed
 import copy
@@ -93,7 +92,7 @@ class arena():
 def fork_process(arena_obj, num_games, cpu): # make arena picklable
     arena_obj.evaluate(num_games, cpu)
 
-def evaluate_nets(args, iteration_1, iteration_2) :
+def evaluate_nets(model, args, iteration_1, iteration_2) :
     logger.info("Loading nets...")
     current_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_2); best_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_1)
     current_net_filename = os.path.join("./model_data/",\
@@ -104,8 +103,8 @@ def evaluate_nets(args, iteration_1, iteration_2) :
     logger.info("Current net: %s" % current_net)
     logger.info("Previous (Best) net: %s" % best_net)
     
-    current_cnet = ConnectNet()
-    best_cnet = ConnectNet()
+    current_cnet = model()
+    best_cnet = model()
     cuda = torch.cuda.is_available()
     if cuda:
         current_cnet.cuda()

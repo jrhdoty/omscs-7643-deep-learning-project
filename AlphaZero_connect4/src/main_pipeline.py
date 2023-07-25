@@ -8,6 +8,7 @@ from MCTS_c4 import run_MCTS
 from train_c4 import train_connectnet
 from evaluator_c4 import evaluate_nets
 from argparse import ArgumentParser
+from alpha_net_c4 import ConnectNet
 import logging
 
 logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', \
@@ -28,18 +29,25 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
     parser.add_argument("--gradient_acc_steps", type=int, default=1, help="Number of steps of gradient accumulation")
     parser.add_argument("--max_norm", type=float, default=1.0, help="Clipped gradient norm")
+    parser.add_argument("--model", type=str, default="alpha_net", help="Select the model from list of defined architectures")
     args = parser.parse_args()
+
+    # Import and register network architectures here.
+    models_dict = {
+        "alpha_net": ConnectNet
+    }
+    model = models_dict[args.model]
     
     logger.info("Starting iteration pipeline...")
     for i in range(args.iteration, args.total_iterations): 
-        run_MCTS(args, start_idx=0, iteration=i)
-        train_connectnet(args, iteration=i, new_optim_state=True)
+        run_MCTS(model, args, start_idx=0, iteration=i)
+        train_connectnet(model, args, iteration=i, new_optim_state=True)
         if i >= 1:
-            winner = evaluate_nets(args, i, i + 1)
+            winner = evaluate_nets(model, args, i, i + 1)
             counts = 0
             while (winner != (i + 1)):
                 logger.info("Trained net didn't perform better, generating more MCTS games for retraining...")
-                run_MCTS(args, start_idx=(counts + 1)*args.num_games_per_MCTS_process, iteration=i)
+                run_MCTS(model, args, start_idx=(counts + 1)*args.num_games_per_MCTS_process, iteration=i)
                 counts += 1
-                train_connectnet(args, iteration=i, new_optim_state=True)
-                winner = evaluate_nets(args, i, i + 1)
+                train_connectnet(model, args, iteration=i, new_optim_state=True)
+                winner = evaluate_nets(model, args, i, i + 1)
