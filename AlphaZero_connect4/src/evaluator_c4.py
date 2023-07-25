@@ -3,7 +3,6 @@
 import os.path
 import torch
 import numpy as np
-from alpha_net_c4 import ConnectNet
 from connect_board import board as cboard
 import encoder_decoder_c4 as ed
 import copy
@@ -31,10 +30,11 @@ def load_pickle(filename):
     return data
 
 class arena():
-    def __init__(self, current_cnet, best_cnet):
+    def __init__(self, current_cnet, best_cnet, num_rollouts):
         self.current = current_cnet
         self.best = best_cnet
         self.cuda = torch.cuda.is_available()
+        self.rollouts = num_rollouts
     
     def play_round(self):
         logger.info("Starting game round...")
@@ -50,10 +50,10 @@ class arena():
             dataset.append(copy.deepcopy(ed.encode_board(current_board)))
             print(""); print(current_board.current_board)
             if current_board.player == 0:
-                root = UCT_search(current_board,777,white,t, self.cuda)
+                root = UCT_search(current_board,self.rollouts,white,t, self.cuda)
                 policy = get_policy(root, t); print("Policy: ", policy, "white = %s" %(str(w)))
             elif current_board.player == 1:
-                root = UCT_search(current_board,777,black,t, self.cuda)
+                root = UCT_search(current_board,self.rollouts,black,t, self.cuda)
                 policy = get_policy(root, t); print("Policy: ", policy, "black = %s" %(str(b)))
             current_board = do_decode_n_move_pieces(current_board,\
                                                     np.random.choice(np.array([0,1,2,3,4,5,6]), \
@@ -93,7 +93,7 @@ class arena():
 def fork_process(arena_obj, num_games, cpu): # make arena picklable
     arena_obj.evaluate(num_games, cpu)
 
-def evaluate_nets(args, iteration_1, iteration_2) :
+def evaluate_nets(model, args, iteration_1, iteration_2) :
     logger.info("Loading nets...")
     current_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_2); best_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_1)
     current_net_filename = os.path.join("./model_data/",\
@@ -104,8 +104,8 @@ def evaluate_nets(args, iteration_1, iteration_2) :
     logger.info("Current net: %s" % current_net)
     logger.info("Previous (Best) net: %s" % best_net)
     
-    current_cnet = ConnectNet()
-    best_cnet = ConnectNet()
+    current_cnet = model()
+    best_cnet = model()
     cuda = torch.cuda.is_available()
     if cuda:
         current_cnet.cuda()
@@ -134,7 +134,7 @@ def evaluate_nets(args, iteration_1, iteration_2) :
         logger.info("Spawning %d processes..." % num_processes)
         with torch.no_grad():
             for i in range(num_processes):
-                p = mp.Process(target=fork_process,args=(arena(current_cnet,best_cnet), args.num_evaluator_games, i))
+                p = mp.Process(target=fork_process,args=(arena(current_cnet, best_cnet, args.num_rollouts), args.num_evaluator_games, i))
                 p.start()
                 processes.append(p)
             for p in processes:
@@ -156,7 +156,7 @@ def evaluate_nets(args, iteration_1, iteration_2) :
         current_cnet.load_state_dict(checkpoint['state_dict'])
         checkpoint = torch.load(best_net_filename)
         best_cnet.load_state_dict(checkpoint['state_dict'])
-        arena1 = arena(current_cnet=current_cnet, best_cnet=best_cnet)
+        arena1 = arena(current_cnet=current_cnet, best_cnet=best_cnet, num_rollouts=args.num_rollouts)
         arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
         
         stats = load_pickle("wins_cpu_%i" % (0))

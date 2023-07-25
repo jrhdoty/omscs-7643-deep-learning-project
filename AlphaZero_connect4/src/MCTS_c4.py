@@ -9,7 +9,6 @@ from connect_board import board as c_board
 import copy
 import torch
 import torch.multiprocessing as mp
-from alpha_net_c4 import ConnectNet
 import datetime
 import logging
 from tqdm import tqdm
@@ -182,7 +181,7 @@ def MCTS_self_play(connectnet, num_games, start_idx, cpu, args, iteration):
                 t = 0.1
             states.append(copy.deepcopy(current_board.current_board))
             board_state = copy.deepcopy(ed.encode_board(current_board))
-            root = UCT_search(current_board, 777, connectnet, t, cuda)
+            root = UCT_search(current_board, args.num_rollouts, connectnet, t, cuda)
             policy = get_policy(root, t); print("[CPU: %d]: Game %d POLICY:\n " % (cpu, idxx), policy)
             current_board = do_decode_n_move_pieces(current_board,\
                                                     np.random.choice(np.array([0,1,2,3,4,5,6]), \
@@ -207,9 +206,9 @@ def MCTS_self_play(connectnet, num_games, start_idx, cpu, args, iteration):
         save_as_pickle("iter_%d/" % iteration +\
                        "dataset_iter%d_cpu%i_%i_%s" % (iteration, cpu, idxx, datetime.datetime.today().strftime("%Y-%m-%d")), dataset_p)
    
-def run_MCTS(args, start_idx=0, iteration=0):
+def run_MCTS(model, args, start_idx=0, iteration=0):
     net_to_play="%s_iter%d.pth.tar" % (args.neural_net_name, iteration)
-    net = ConnectNet()
+    net = model()
     cuda = torch.cuda.is_available()
     if cuda:
         net.cuda()

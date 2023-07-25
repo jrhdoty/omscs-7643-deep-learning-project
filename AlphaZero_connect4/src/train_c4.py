@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from alpha_net_c4 import ConnectNet, AlphaLoss, board_data
+from alpha_net_c4 import AlphaLoss, board_data
 import os
 import pickle
 import datetime
@@ -129,7 +129,7 @@ def train(net, dataset, optimizer, scheduler, start_epoch, cpu, args, iteration)
     plt.savefig(os.path.join("./model_data/", "Loss_vs_Epoch_iter%d_%s.png" % ((iteration + 1), datetime.datetime.today().strftime("%Y-%m-%d"))))
     plt.show()
     
-def train_connectnet(args, iteration, new_optim_state):
+def train_connectnet(model, args, iteration, new_optim_state):
     # gather data
     logger.info("Loading training data...")
     data_path="./datasets/iter_%d/" % iteration
@@ -142,7 +142,7 @@ def train_connectnet(args, iteration, new_optim_state):
     logger.info("Loaded data from %s." % data_path)
     
     # train net
-    net = ConnectNet()
+    net = model()
     cuda = torch.cuda.is_available()
     if cuda:
         net.cuda()
