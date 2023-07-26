@@ -23,6 +23,7 @@ def save_as_pickle(filename, data):
         pickle.dump(data, output)
         
 def load_pickle(filename):
+    data = None
     completeName = os.path.join("./evaluator_data/",\
                                 filename)
     try:
@@ -30,6 +31,7 @@ def load_pickle(filename):
             data = pickle.load(pkl_file)
     except Exception as e:
         logger.error(f"An error occurred in load_pickle for fileName: {completeName}, error: {e}")
+
     return data
 
 class arena():
@@ -146,7 +148,8 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
         wins_ratio = 0.0
         for i in range(num_processes):
             stats = load_pickle("wins_cpu_%i" % (i))
-            wins_ratio += stats['best_win_ratio']
+            if stats != None:
+                wins_ratio += stats['best_win_ratio']
         wins_ratio = wins_ratio/num_processes
         if wins_ratio >= 0.55:
             return iteration_2
