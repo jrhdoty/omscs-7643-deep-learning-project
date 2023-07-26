@@ -25,8 +25,11 @@ def save_as_pickle(filename, data):
 def load_pickle(filename):
     completeName = os.path.join("./evaluator_data/",\
                                 filename)
-    with open(completeName, 'rb') as pkl_file:
-        data = pickle.load(pkl_file)
+    try:
+        with open(completeName, 'rb') as pkl_file:
+            data = pickle.load(pkl_file)
+    except Exception as e:
+        logger.error(f"An error occurred in load_pickle for fileName: {completeName}, error: {e}")
     return data
 
 class arena():

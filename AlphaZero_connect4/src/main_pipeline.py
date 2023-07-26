@@ -41,8 +41,13 @@ if __name__ == "__main__":
     
     logger.info("Starting iteration pipeline...")
     for i in range(args.iteration, args.total_iterations): 
+        logger.info(f'Starting MCTS run {i}...\n')
         run_MCTS(model, args, start_idx=0, iteration=i)
+
+        logger.info(f'Finished MCTS run {i}...\n', 'Starting training')
         train_connectnet(model, args, iteration=i, new_optim_state=True)
+
+        logger.info(f'Finished training {i}...\n', 'Evaluating model...')
         if i >= 1:
             winner = evaluate_nets(model, args, i, i + 1)
             counts = 0
