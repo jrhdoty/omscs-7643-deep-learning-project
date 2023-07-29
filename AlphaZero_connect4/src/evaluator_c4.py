@@ -166,7 +166,7 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
         arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
         
         stats = load_pickle("wins_cpu_%i" % (0))
-        if stats.best_win_ratio >= 0.55:
+        if stats['best_win_ratio'] >= 0.55:
             return iteration_2
         else:
             return iteration_1
