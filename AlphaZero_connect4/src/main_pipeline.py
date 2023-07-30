@@ -8,7 +8,7 @@ from MCTS_c4 import run_MCTS
 from train_c4 import train_connectnet
 from evaluator_c4 import evaluate_nets
 from argparse import ArgumentParser
-from alpha_net_c4 import ConnectNet
+from alpha_net_c4 import ConnectNet, SmallConnectNet
 import logging
 
 logging.basicConfig(format='%(asctime)s [%(levelname)s]: %(message)s', \
@@ -35,7 +35,8 @@ if __name__ == "__main__":
 
     # Import and register network architectures here.
     models_dict = {
-        "alpha_net": ConnectNet
+        "alpha_net": ConnectNet,
+        "small_alpha_net": SmallConnectNet
     }
     model = models_dict[args.model]
     
