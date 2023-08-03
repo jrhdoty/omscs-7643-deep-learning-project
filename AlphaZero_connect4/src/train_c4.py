@@ -69,7 +69,9 @@ def train(net, dataset, optimizer, scheduler, start_epoch, cpu, args, iteration)
     losses_per_epoch = load_results(iteration + 1)
     
     logger.info("Starting training process...")
-    update_size = len(train_loader)//10
+    update_size = len(train_loader)
+    if len(train_loader) >= 10:
+        update_size = len(train_loader)//10
     print("Update step size: %d" % update_size)
     for epoch in range(start_epoch, args.num_epochs):
         total_loss = 0.0

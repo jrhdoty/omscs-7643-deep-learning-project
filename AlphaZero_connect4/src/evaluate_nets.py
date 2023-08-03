@@ -1,5 +1,15 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
 
+"""
+from MCTS_c4 import run_MCTS
+from train_c4 import train_connectnet
+from evaluator_c4 import evaluate_nets
+from argparse import ArgumentParser
+from alpha_net_c4 import ConnectNet, SmallConnectNet
+import logging
+import os
+import torch
 import os.path
 import torch
 import numpy as np
@@ -91,27 +101,28 @@ class arena():
             save_as_pickle("evaluate_net_dataset_cpu%i_%i_%s_%s" % (cpu,i,datetime.datetime.today().strftime("%Y-%m-%d"),\
                                                                      str(winner)),dataset)
         print("Current_net wins ratio: %.5f" % (current_wins/num_games))
-        save_as_pickle("wins_cpu_%i" % (cpu),\
+        save_as_pickle("wins_eval_cpu_%i" % (cpu),\
                                              {"best_win_ratio": current_wins/num_games, "num_games":num_games})
         logger.info("[CPU %d]: Finished arena games!" % cpu)
-        return current_wins/num_games
         
 def fork_process(arena_obj, num_games, cpu): # make arena picklable
     arena_obj.evaluate(num_games, cpu)
 
-def evaluate_nets(model, args, iteration_1, iteration_2) :
+
+def evaluate_nets(args) :
     logger.info("Loading nets...")
-    current_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_2); best_net="%s_iter%d.pth.tar" % (args.neural_net_name, iteration_1)
     current_net_filename = os.path.join("./model_data/",\
-                                    current_net)
+                                    args.net_1)
     best_net_filename = os.path.join("./model_data/",\
-                                    best_net)
+                                    args.net_2)
     
-    logger.info("Current net: %s" % current_net)
-    logger.info("Previous (Best) net: %s" % best_net)
     
-    current_cnet = model()
-    best_cnet = model()
+    current_cnet = ConnectNet()
+    if "small" in current_net_filename:
+        current_cnet = SmallConnectNet()
+    best_cnet = ConnectNet()
+    if "small" in best_net_filename:
+        best_cnet = SmallConnectNet()
     cuda = torch.cuda.is_available()
     if cuda:
         current_cnet.cuda()
@@ -140,7 +151,7 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
         logger.info("Spawning %d processes..." % num_processes)
         with torch.no_grad():
             for i in range(num_processes):
-                p = mp.Process(target=fork_process,args=(arena(current_cnet, best_cnet, args.num_rollouts), args.num_evaluator_games, i))
+                p = mp.Process(target=fork_process,args=(arena(current_cnet,best_cnet, args.num_rollouts), args.num_evaluator_games, i))
                 p.start()
                 processes.append(p)
             for p in processes:
@@ -148,14 +159,10 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
                
         wins_ratio = 0.0
         for i in range(num_processes):
-            stats = load_pickle("wins_cpu_%i" % (i))
-            if stats != None:
-                wins_ratio += stats['best_win_ratio']
+            stats = load_pickle("wins_eval_cpu_%i" % (i))
+            wins_ratio += stats['best_win_ratio']
         wins_ratio = wins_ratio/num_processes
-        if wins_ratio >= 0.55:
-            return iteration_2
-        else:
-            return iteration_1
+        print("Win Ratio {}".format(wins_ratio))
             
     elif args.MCTS_num_processes == 1:
         current_cnet.eval(); best_cnet.eval()
@@ -163,11 +170,25 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
         current_cnet.load_state_dict(checkpoint['state_dict'])
         checkpoint = torch.load(best_net_filename)
         best_cnet.load_state_dict(checkpoint['state_dict'])
-        arena1 = arena(current_cnet=current_cnet, best_cnet=best_cnet, num_rollouts=args.num_rollouts)
-        win_ratio = arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
+        arena1 = arena(current_cnet=current_cnet, best_cnet=best_cnet)
+        arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
         
-        stats = load_pickle("wins_cpu_%i" % (0))
-        if stats['best_win_ratio'] >= 0.55:
-            return iteration_2
-        else:
-            return iteration_1
+        stats = load_pickle("wins_eval_cpu_%i" % (0))
+        print("Win Ratio {}".format(stats['best_win_ratio']))
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--net_1", default="c4_current_net_trained_iter8.pth.tar")
+    parser.add_argument("--net_2", default="cc4_small_current_net__iter5.pth.tar")
+    parser.add_argument("--MCTS_num_processes", type=int, default=5, help="Number of processes to run MCTS self-plays")
+    parser.add_argument("--num_games_per_MCTS_process", type=int, default=120, help="Number of games to simulate per MCTS self-play process")
+    parser.add_argument("--num_evaluator_games", type=int, default=100, help="No of games to play to evaluate neural nets")
+    parser.add_argument("--num_rollouts", type=int, default=777, help="The number of MCTS rollouts to perform during simulation step.")
+
+    args = parser.parse_args()
+
+    evaluate_nets(args)
+
+
+
+

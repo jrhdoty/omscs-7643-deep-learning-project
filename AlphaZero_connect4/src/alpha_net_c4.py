@@ -93,6 +93,24 @@ class ConnectNet(nn.Module):
         return s
         
 
+class SmallConnectNet(nn.Module):
+    def __init__(self):
+        super(SmallConnectNet, self).__init__()
+        self.resnet_depth = 9
+        self.conv = ConvBlock()
+        for block in range(self.resnet_depth):
+            setattr(self, "res_%i" % block,ResBlock())
+        self.outblock = OutBlock()
+    
+    def forward(self,s):
+        s = self.conv(s)
+        for block in range(self.resnet_depth):
+            s = getattr(self, "res_%i" % block)(s)
+        s = self.outblock(s)
+        return s
+        
+
+
 class AlphaLoss(torch.nn.Module):
     def __init__(self):
         super(AlphaLoss, self).__init__()
