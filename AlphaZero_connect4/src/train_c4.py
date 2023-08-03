@@ -89,7 +89,7 @@ def train(net, dataset, optimizer, scheduler, start_epoch, cpu, args, iteration)
                 optimizer.zero_grad()
                 
             total_loss += loss.item()
-            if i % update_size == (update_size - 1):    # print every update_size-d mini-batches of size = batch_size
+            if update_size != 0 and i % update_size == (update_size - 1):    # print every update_size-d mini-batches of size = batch_size
                 losses_per_batch.append(args.gradient_acc_steps*total_loss/update_size)
                 print('[Iteration %d] Process ID: %d [Epoch: %d, %5d/ %d points] total loss per batch: %.3f' %
                       (iteration, os.getpid(), epoch + 1, (i + 1)*args.batch_size, len(train_set), losses_per_batch[-1]))

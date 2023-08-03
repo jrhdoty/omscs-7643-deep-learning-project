@@ -14,3 +14,8 @@
 /src/play_on_fb.py
 /src/analyze_games_c4.py
 /remote
+
+# large assets
+src/v3_datasets
+src/model_data
+src/v3_model_data
