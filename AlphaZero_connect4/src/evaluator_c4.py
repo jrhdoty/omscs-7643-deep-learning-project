@@ -94,6 +94,7 @@ class arena():
         save_as_pickle("wins_cpu_%i" % (cpu),\
                                              {"best_win_ratio": current_wins/num_games, "num_games":num_games})
         logger.info("[CPU %d]: Finished arena games!" % cpu)
+        return current_wins/num_games
         
 def fork_process(arena_obj, num_games, cpu): # make arena picklable
     arena_obj.evaluate(num_games, cpu)
@@ -163,7 +164,7 @@ def evaluate_nets(model, args, iteration_1, iteration_2) :
         checkpoint = torch.load(best_net_filename)
         best_cnet.load_state_dict(checkpoint['state_dict'])
         arena1 = arena(current_cnet=current_cnet, best_cnet=best_cnet, num_rollouts=args.num_rollouts)
-        arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
+        win_ratio = arena1.evaluate(num_games=args.num_evaluator_games, cpu=0)
         
         stats = load_pickle("wins_cpu_%i" % (0))
         if stats['best_win_ratio'] >= 0.55:
