@@ -50,10 +50,11 @@ if __name__ == "__main__":
         logger.info(f'Finished training {i}...\n', 'Evaluating model...')
         if i >= 1:
             winner = evaluate_nets(model, args, i, i + 1)
-            counts = 0
-            while (winner != (i + 1)):
-                logger.info("Trained net didn't perform better, generating more MCTS games for retraining...")
-                run_MCTS(model, args, start_idx=(counts + 1)*args.num_games_per_MCTS_process, iteration=i)
-                counts += 1
-                train_connectnet(model, args, iteration=i, new_optim_state=True)
-                winner = evaluate_nets(model, args, i, i + 1)
+            logger.info(f"Evaluation {i} vs. {i+1} -- Winner: {winner}")
+            #counts = 0
+            #while (winner != (i + 1)):
+            #    logger.info("Trained net didn't perform better, generating more MCTS games for retraining...")
+            #    run_MCTS(model, args, start_idx=(counts + 1)*args.num_games_per_MCTS_process, iteration=i)
+            #    counts += 1
+            #    train_connectnet(model, args, iteration=i, new_optim_state=True)
+            #    winner = evaluate_nets(model, args, i, i + 1)

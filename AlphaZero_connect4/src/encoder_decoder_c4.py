@@ -22,6 +22,7 @@ def decode_board(encoded):
     for row in range(6):
         for col in range(7):
             for k in range(2):
+                print(row, col, k)
                 if encoded[row, col, k] == 1:
                     decoded[row, col] = decoder_dict[k]
     cboard = board()
